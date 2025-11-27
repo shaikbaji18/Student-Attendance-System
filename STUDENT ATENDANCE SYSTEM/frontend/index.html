@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Attendance System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for Inter font and basic body styling */
+        body {
+            font-family: 'Inter', sans-serif;
+            /* More vibrant and complex gradient background */
+            background: linear-gradient(135deg, #6ee7b7 0%, #34d399 25%, #22d3ee 75%, #7dd3fc 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center; /* Center content vertically */
+            min-height: 100vh; /* Minimum height for the body */
+            padding: 20px; /* Padding around the main content */
+            box-sizing: border-box; /* Include padding in element's total width and height */
+            overflow-x: hidden; /* Prevent horizontal scroll */
+        }
+
+        /* Styling for the main container */
+        .container {
+            background-color: #ffffff; /* White background for the card */
+            border-radius: 2rem; /* Even more rounded corners */
+            /* Multi-layered, softer shadow for a floating effect */
+            box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.3), 0 15px 25px -5px rgba(0, 0, 0, 0.15);
+            padding: 4rem; /* Even more ample padding */
+            width: 100%; /* Full width on small screens */
+            max-width: 900px; /* Wider max width */
+            display: flex;
+            flex-direction: column;
+            gap: 3rem; /* More space between sections */
+            border: 1px solid #e2e8f0; /* Subtle border */
+            animation: fadeInScale 0.8s ease-out forwards; /* Entrance animation */
+        }
+
+        /* Keyframe for entrance animation */
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        /* Styling for input fields and buttons */
+        input[type="number"],
+        input[type="date"],
+        button {
+            border-radius: 1rem; /* Very rounded corners for inputs/buttons */
+            padding: 1rem 1.5rem; /* Generous padding */
+            border: 1px solid #a7f3d0; /* Light green border for inputs */
+            font-size: 1.1rem; /* Slightly larger font */
+            transition: all 0.3s ease-in-out; /* Smooth transition for focus/hover */
+        }
+        input[type="number"]:focus,
+        input[type="date"]:focus {
+            outline: none;
+            border-color: #06b6d4; /* Cyan 500 on focus */
+            box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.4); /* Cyan focus ring */
+        }
+        button {
+            background: linear-gradient(45deg, #06b6d4, #34d399); /* Gradient button background */
+            color: white;
+            font-weight: 800; /* Extra bold */
+            cursor: pointer;
+            box-shadow: 0 6px 10px -2px rgba(0, 0, 0, 0.2), 0 3px 5px -1px rgba(0, 0, 0, 0.1); /* Stronger button shadow */
+            text-transform: uppercase; /* Uppercase text */
+            letter-spacing: 0.05em; /* Slight letter spacing */
+        }
+        button:hover {
+            background: linear-gradient(45deg, #0ea5e9, #10b981); /* Slightly different gradient on hover */
+            transform: translateY(-3px) scale(1.02); /* More pronounced lift and slight scale */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.25), 0 4px 6px -2px rgba(0, 0, 0, 0.15);
+        }
+        button:active {
+            background: linear-gradient(45deg, #0284c7, #059669); /* Even darker gradient on active */
+            transform: translateY(0) scale(1); /* Reset lift and scale */
+            box-shadow: 0 2px 3px -1px rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        /* Styling for output areas */
+        .output-area {
+            background-color: #f0fdf4; /* Light green for output */
+            border: 1px solid #d1fae5; /* Light green border */
+            border-radius: 1rem;
+            padding: 1.5rem;
+            min-height: 150px; /* Increased minimum height */
+            overflow-y: auto; /* Scroll if content overflows */
+            white-space: pre-wrap; /* Preserve whitespace and wrap text */
+            font-family: 'monospace'; /* Monospace font for output */
+            color: #2d3748; /* Darker text color */
+            line-height: 1.7; /* Better line spacing */
+            box-shadow: inset 0 1px 5px rgba(0,0,0,0.05); /* Inner shadow */
+        }
+
+        /* Styling for messages */
+        .message-box {
+            padding: 1.25rem 2rem; /* Increased padding */
+            border-radius: 1rem;
+            margin-top: 2rem; /* Increased margin */
+            font-weight: 700; /* Bold */
+            text-align: center; /* Center message text */
+            box-shadow: 0 6px 10px -2px rgba(0, 0, 0, 0.1), 0 3px 5px -1px rgba(0, 0, 0, 0.08);
+            animation: slideInFromTop 0.5s ease-out forwards; /* Message entrance animation */
+        }
+
+        @keyframes slideInFromTop {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message-box.success {
+            background-color: #dcfce7; /* Green 100 */
+            color: #16a34a; /* Green 600 */
+            border: 1px solid #86efac; /* Green border */
+        }
+        .message-box.error {
+            background-color: #fee2e2; /* Red 100 */
+            color: #dc2626; /* Red 600 */
+            border: 1px solid #fca5a5; /* Red border */
+        }
+
+        /* Section styling */
+        .section-card {
+            background: linear-gradient(180deg, #f0fdf4 0%, #e0f2fe 100%); /* Subtle gradient for sections */
+            border-radius: 1.5rem;
+            box-shadow: inset 0 3px 8px 0 rgba(0, 0, 0, 0.1); /* Stronger inner shadow for depth */
+            padding: 3rem; /* Consistent padding */
+            border: 1px solid #bae6fd; /* Light blue border */
+        }
+
+        /* Header styling */
+        h1 {
+            color: #1f2937; /* Darker text for main header */
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1); /* More pronounced text shadow */
+        }
+        h2 {
+            color: #374151; /* Slightly lighter dark text for section headers */
+            border-bottom: 2px solid #a7f3d0; /* Underline effect with accent color */
+            padding-bottom: 0.75rem;
+            margin-bottom: 1.5rem; /* Increased margin for underline */
+        }
+
+        /* Project details styling */
+        .project-details {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e2e8f0;
+            text-align: center;
+            font-size: 0.95rem;
+            color: #4b5563;
+        }
+        .project-details p {
+            margin-bottom: 0.5rem;
+        }
+        .project-details strong {
+            color: #1f2937;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .container {
+                padding: 2rem;
+                gap: 1.5rem;
+            }
+            .section-card {
+                padding: 2rem;
+            }
+            h1 {
+                font-size: 2.5rem; /* Adjust for smaller screens */
+            }
+            h2 {
+                font-size: 1.75rem; /* Adjust for smaller screens */
+            }
+            input[type="number"],
+            input[type="date"],
+            button {
+                padding: 0.75rem 1rem;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-4xl font-extrabold text-center mb-8">Student Attendance Tracker</h1>
+
+        <div id="messageBox" class="message-box hidden"></div>
+
+        <div class="section-card">
+            <h2 class="text-2xl font-bold mb-5">Mark Attendance</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                <input type="number" id="markRollNo" placeholder="Enter Roll Number" class="w-full">
+                <input type="date" id="markDate" class="w-full">
+            </div>
+            <button id="markBtn" class="w-full">Mark Attendance</button>
+        </div>
+
+        <div class="section-card">
+            <h2 class="text-2xl font-bold mb-5">View Student Attendance</h2>
+            <input type="number" id="viewRollNo" placeholder="Enter Roll Number to View" class="w-full mb-5">
+            <button id="viewBtn" class="w-full mb-5">View Attendance</button>
+            <div id="viewOutput" class="output-area"></div>
+        </div>
+
+        <div class="section-card">
+            <h2 class="text-2xl font-bold mb-5">Overall System Statistics</h2>
+            <button id="statsBtn" class="w-full mb-5">Get Overall Statistics</button>
+            <div id="statsOutput" class="output-area"></div>
+        </div>
+
+        <div class="project-details">
+            <h3 class="text-lg font-bold mb-3 text-gray-700">Project Done By:</h3>
+            <p><strong>Reg No:</strong> 12309590 &nbsp; <strong>Name:</strong> Shaik Baji</p>
+            <p><strong>Reg No:</strong> 12322263 &nbsp; <strong>Name:</strong> P V Manikanta</p>
+            <p><strong>Reg No:</strong> 12308491 &nbsp; <strong>Name:</strong> Mahendra Peyyala</p>
+        </div>
+    </div>
+
+    <script>
+        // Set today's date as default for the date input
+        document.addEventListener('DOMContentLoaded', () => {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0'); // Months start at 0!
+            const dd = String(today.getDate()).padStart(2, '0');
+            document.getElementById('markDate').value = `${yyyy}-${mm}-${dd}`;
+        });
+
+        // Base URL for your Flask backend
+        const API_BASE_URL = 'http://127.0.0.1:5000'; // Make sure this matches your Flask server's address
+
+        // --- Frontend DOM Elements ---
+        const markRollNoInput = document.getElementById('markRollNo');
+        const markDateInput = document.getElementById('markDate');
+        const markBtn = document.getElementById('markBtn');
+
+        const viewRollNoInput = document.getElementById('viewRollNo');
+        const viewBtn = document.getElementById('viewBtn');
+        const viewOutputDiv = document.getElementById('viewOutput');
+
+        const statsBtn = document.getElementById('statsBtn');
+        const statsOutputDiv = document.getElementById('statsOutput');
+
+        const messageBox = document.getElementById('messageBox');
+
+        /**
+         * @brief Displays a message to the user in the message box.
+         * @param {string} message The message to display.
+         * @param {string} type The type of message ('success' or 'error').
+         */
+        function displayMessage(message, type) {
+            messageBox.textContent = message;
+            messageBox.className = `message-box ${type}`; // Apply type-specific styling
+            messageBox.classList.remove('hidden'); // Make it visible
+
+            // Hide the message after a few seconds
+            setTimeout(() => {
+                messageBox.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Event listener for Mark Attendance button
+        markBtn.addEventListener('click', async () => {
+            const rollNo = parseInt(markRollNoInput.value);
+            const date = markDateInput.value;
+
+            if (isNaN(rollNo) || rollNo <= 0) {
+                displayMessage("Please enter a valid Roll Number.", "error");
+                return;
+            }
+            if (!date) {
+                displayMessage("Please select a date.", "error");
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/mark_attendance`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ roll_no: rollNo, date: date }),
+                });
+
+                const result = await response.json();
+
+                if (response.ok) { // Check if HTTP status is 2xx
+                    displayMessage(result.message, "success");
+                    markRollNoInput.value = ''; // Clear input after successful mark
+                } else {
+                    displayMessage(result.message || "An error occurred.", "error");
+                }
+            } catch (error) {
+                console.error('Error marking attendance:', error);
+                displayMessage("Failed to connect to the server. Please ensure the Python server is running.", "error");
+            }
+        });
+
+        // Event listener for View Attendance button
+        viewBtn.addEventListener('click', async () => {
+            const rollNo = parseInt(viewRollNoInput.value);
+
+            if (isNaN(rollNo) || rollNo <= 0) {
+                displayMessage("Please enter a valid Roll Number.", "error");
+                viewOutputDiv.textContent = ''; // Clear previous output
+                return;
+            }
+
+            try {
+                // Fetch both student attendance and overall stats concurrently
+                const [studentResponse, statsResponse] = await Promise.all([
+                    fetch(`${API_BASE_URL}/view_attendance/${rollNo}`),
+                    fetch(`${API_BASE_URL}/get_overall_stats`)
+                ]);
+
+                const studentResult = await studentResponse.json();
+                const statsResult = await statsResponse.json();
+
+                if (studentResponse.ok && statsResponse.ok) {
+                    const studentDates = studentResult.dates || [];
+                    const totalUniqueDates = statsResult.stats ? statsResult.stats.total_unique_dates : 0;
+
+                    const presentDays = studentDates.length;
+                    let absentDays = 0;
+                    let attendancePercentage = 0;
+
+                    if (totalUniqueDates > 0) {
+                        absentDays = totalUniqueDates - presentDays;
+                        // Ensure absentDays is not negative if for some reason presentDays > totalUniqueDates
+                        if (absentDays < 0) absentDays = 0;
+                        attendancePercentage = (presentDays / totalUniqueDates) * 100;
+                    }
+
+                    let outputText = `
+Attendance for Roll No: ${studentResult.roll_no || rollNo}
+----------------------------------
+Days Present: ${presentDays}
+Days Absent: ${absentDays} (out of ${totalUniqueDates} possible attendance days)
+Attendance Percentage: ${attendancePercentage.toFixed(2)}%
+----------------------------------
+Dates Present:
+${studentDates.length > 0 ? studentDates.join('\n') : 'No records found.'}
+                    `;
+                    viewOutputDiv.textContent = outputText;
+                    displayMessage(`Viewing attendance for Roll No: ${rollNo}`, "success");
+
+                } else {
+                    // Handle errors from either API call
+                    const errorMessage = (studentResult.message || statsResult.message || "An error occurred while fetching data.");
+                    viewOutputDiv.textContent = errorMessage;
+                    displayMessage(errorMessage, "error");
+                }
+            } catch (error) {
+                console.error('Error viewing attendance or fetching stats:', error);
+                displayMessage("Failed to connect to the server. Please ensure the Python server is running.", "error");
+            }
+        });
+
+        // Event listener for Get Statistics button
+        statsBtn.addEventListener('click', async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/get_overall_stats`);
+                const result = await response.json();
+
+                if (response.ok) {
+                    const stats = result.stats;
+                    statsOutputDiv.textContent = `
+Total Students Registered: ${stats.total_students}
+Total Unique Dates Marked: ${stats.total_unique_dates}
+Total Attendance Entries: ${stats.total_attendance_entries}
+                    `;
+                    displayMessage("Overall statistics retrieved.", "success");
+                } else {
+                    statsOutputDiv.textContent = result.message || "Error retrieving statistics.";
+                    displayMessage(result.message || "Error retrieving statistics.", "error");
+                }
+            } catch (error) {
+                console.error('Error getting statistics:', error);
+                displayMessage("Failed to connect to the server. Please ensure the Python server is running.", "error");
+            }
+        });
+    </script>
+</body>
+</html>
